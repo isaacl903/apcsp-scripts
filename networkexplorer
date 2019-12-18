@@ -1,0 +1,48 @@
+#!/bin/bash
+
+IpAddress=`hostname -I`
+
+VarStart=`echo "$IpAddress"` | cut -c 1
+
+VarEnd=${IpAddress##$VarStart*.}
+
+FinalIpAddress=${IpAddress%$VarEnd}
+
+for i in {1..255}; do
+
+
+	IPUpdate="$FinalIpAddress$i"
+
+
+	if ping -c 1 -W 1 "$IPUpdate" >/dev/null 2>&1; then
+
+
+		echo $IPUpdate : alive
+		host=`host $IPUpdate | cut -d' ' -f5`
+		echo "host : $host"
+		File_MacAddress=`grep $IPUpdate /proc/net/arp`
+		MacAddress=`echo $File_MacAddress | cut -d' ' -f4`
+		echo "Mac Address : $MacAddress"
+		if nc -z -w 1 $IPUpdate 22; then
+
+			echo "ssh is now open"
+		else
+			echo "ssh is now closed"
+		fi
+
+		if nc -z -w 1 $IPUpdate 80; then
+
+			echo "http is now open"
+		else
+			echo "http is now closed"
+
+		fi
+
+			echo " "
+
+	fi
+
+
+done
+
+
